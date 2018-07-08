@@ -10,8 +10,8 @@ public class StationSettingsMapper {
 
 	public static StationSettings map(StationSettingsDTO value){
 		StationSettings mapped = new StationSettings();
-		mapped.setRequestInterval(value.getRequestInterval());
-		mapped.setSyncronInterval(value.getSyncronInterval());
+		mapped.setRequestInterval(value.getRequestInterval()/1000);
+		mapped.setSyncronInterval(value.getSyncronInterval()/1000);
 		mapped.setStationActive(value.getStationActive()>0? true : false);
 		return mapped;
 	}
