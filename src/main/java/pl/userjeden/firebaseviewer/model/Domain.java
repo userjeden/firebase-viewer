@@ -8,6 +8,6 @@ import lombok.Setter;
 public class Domain {
 
 	private String name;
-	private Boolean selected;
+	private boolean selected;
 
 }

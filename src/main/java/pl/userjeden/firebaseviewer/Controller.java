@@ -1,31 +1,35 @@
 package pl.userjeden.firebaseviewer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javafx.beans.property.BooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
+import javafx.scene.Node;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
 import pl.userjeden.firebaseviewer.client.FirebaseClientImpl;
 import pl.userjeden.firebaseviewer.mapper.StationReadingsMapper;
 import pl.userjeden.firebaseviewer.mapper.StationSettingsMapper;
 import pl.userjeden.firebaseviewer.model.Domain;
 import pl.userjeden.firebaseviewer.model.StationReading;
-import pl.userjeden.firebaseviewer.model.StationReadingDTO;
 import pl.userjeden.firebaseviewer.model.StationSetting;
 import pl.userjeden.firebaseviewer.parser.FirebaseJsonParserImpl;
 
@@ -36,6 +40,7 @@ public class Controller {
 
 	private FirebaseClientImpl firebaseClient;
 	private FirebaseJsonParserImpl jsonParser;
+
 	private StationSettingsMapper settMapper;
 	private StationReadingsMapper readMapper;
 
@@ -44,6 +49,16 @@ public class Controller {
 
 	private Map<String, StationSetting> allStationSettings;
 	private Map<String, StationReading> allStationReadings;
+
+
+
+	@FXML
+	LineChart<String, Number> chartDisplay;
+
+	@FXML
+	GridPane gridPane;
+
+	List<CheckBox> checkboxes;
 
 	@FXML
 	TextField textFieldAddress;
@@ -78,6 +93,84 @@ public class Controller {
 	@FXML
 	Button buttonLoadData;
 
+	@FXML
+	Button buttonCleanReadings;
+
+	@FXML
+	CheckBox checkboxCleanReadings;
+
+	@FXML
+	Button buttonShowDataPreview;
+
+	@FXML
+	Button buttonExportToFile;
+
+
+	private void fillTable(){
+
+	}
+
+
+	public void onDataPreview(ActionEvent event){
+
+		chartDisplay.getData().clear();
+		chartDisplay.setAnimated(false);
+		chartDisplay.setCreateSymbols(false);
+		chartDisplay.setLegendSide(Side.TOP);
+
+		Map<String, Map<String, String>> stationData = allStationReadings.get(currentStationId).getReadingData();
+		Set<Domain> stationDomains = allStationReadings.get(currentStationId).getReadingDomains();
+		List<String> timeKeys = allStationReadings.get(currentStationId).sortByTime();
+
+
+		int factor = timeKeys.size()/80;
+		List<String> filteredTimeKeys = new ArrayList<String>();
+		int indicator = -1;
+		for(String s : timeKeys){
+			indicator ++;
+			if(indicator % factor == 0){
+				filteredTimeKeys.add(s);
+			}
+		}
+
+		System.out.println(timeKeys.size());
+		System.out.println(filteredTimeKeys.size());
+
+
+		for(CheckBox check : checkboxes){
+			String name = check.getText();
+			Boolean active = check.isSelected();
+
+			for(Domain domain : stationDomains){
+				if(domain.getName().equals(name)){
+					domain.setSelected(active);
+				}
+			}
+		}
+
+
+
+
+		for(Domain domain : stationDomains){
+
+			if(domain.isSelected() == false){
+				continue;
+			}
+
+			String domainName = domain.getName();
+			XYChart.Series dataSeries = new XYChart.Series();
+			dataSeries.setName(domainName);
+
+			for(String key : filteredTimeKeys){
+				Float value = Float.valueOf(stationData.get(key).get(domainName));
+				dataSeries.getData().add(new XYChart.Data(key, value));
+			}
+
+			chartDisplay.getData().add(dataSeries);
+		}
+
+
+	}
 
 
 	public Controller() {
@@ -85,6 +178,8 @@ public class Controller {
 		settMapper = new StationSettingsMapper();
 		readMapper = new StationReadingsMapper();
 		jsonParser = new FirebaseJsonParserImpl();
+		checkboxes = new ArrayList<>();
+		allStationReadings = new HashMap<String, StationReading>();
 		SpinnerValueFactory<Integer> valueFactoryMeas = new SpinnerValueFactory.IntegerSpinnerValueFactory(15, 900);
 		SpinnerValueFactory<Integer> valueFactorySync = new SpinnerValueFactory.IntegerSpinnerValueFactory(60, 1800);
 	}
@@ -139,9 +234,16 @@ public class Controller {
 
 	public void menuStationChosen(ActionEvent event) {
 		currentStationId = menuChooseStation.getSelectionModel().getSelectedItem();
+
 		if (currentStationId != null) {
 			currentStationSettings = allStationSettings.get(currentStationId);
 			showStationSettings(null);
+		}
+
+		if(allStationReadings.get(currentStationId) == null){
+			buttonShowDataPreview.setDisable(true);
+		}else{
+			buttonShowDataPreview.setDisable(false);
 		}
 	}
 
@@ -156,6 +258,7 @@ public class Controller {
 
 		buttonSaveAndRefresh.setDisable(false);
 		buttonLoadData.setDisable(false);
+		checkboxCleanReadings.setDisable(false);
 
 		if (currentStationSettings.isStationActive()) {
 			buttonToggleOn.setSelected(true);
@@ -210,12 +313,48 @@ public class Controller {
 		firebaseClient = new FirebaseClientImpl(projectAddress, projectSecret);
 		String payload = firebaseClient.readStationReading(currentStationId);
 		StationReading read = readMapper.map(jsonParser.unmarshallReadings(payload));
+		allStationReadings.put(currentStationId, read);
+
+		buttonShowDataPreview.setDisable(false);
 
 		read.printMap();
 		read.prepareDomains();
 		read.printDomains();
 
+
+
+
+
+		int row = 0;
+		int col = 0;
+		Set<String> domains = read.filterDomains();
+
+		domains.add("QQQ");
+		domains.add("aaaa");
+		domains.add("xxx");
+		domains.add("vvv");
+		domains.add("QQaQ");
+		domains.add("aaa");
+		domains.add("xxsx");
+		domains.add("vvdv");
+
+		for(String s : domains){
+
+			if(col%3 == 0){
+				RowConstraints con = new RowConstraints(25);
+				gridPane.getRowConstraints().add(con);
+			}
+
+			CheckBox check = new CheckBox(s);
+			gridPane.add(check, col%3, row/3);
+			checkboxes.add(check);
+
+			row ++;
+			col ++;
+		}
+
 	}
+
 
 	private void disableAllButtons() {
 		sliderMeasInterval.setDisable(true);
@@ -226,6 +365,10 @@ public class Controller {
 		buttonToggleOff.setDisable(true);
 		buttonSaveAndRefresh.setDisable(true);
 		buttonLoadData.setDisable(true);
+		buttonCleanReadings.setDisable(true);
+		buttonShowDataPreview.setDisable(true);
+		buttonExportToFile.setDisable(true);
+		checkboxCleanReadings.setDisable(true);
 	}
 
 }

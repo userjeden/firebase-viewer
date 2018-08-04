@@ -1,5 +1,9 @@
 package pl.userjeden.firebaseviewer.mapper;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import pl.userjeden.firebaseviewer.model.StationReading;
@@ -10,11 +14,13 @@ public class StationReadingsMapper {
 	public StationReading map(StationReadingDTO value) {
 		StationReading mapped = new StationReading();
 		Map<Long, Map<String, String>> sourceReading = value.getReading();
-		Map<Long, Map<String, String>> targetReading = new HashMap<Long, Map<String, String>>();
+		Map<String, Map<String, String>> targetReading = new HashMap<String, Map<String, String>>();
 		for (Long key : sourceReading.keySet()) {
-			targetReading.put(key, copyMap(sourceReading.get(key)));
+			LocalDateTime time = Instant.ofEpochMilli(key*1000).atZone(ZoneId.systemDefault()).toLocalDateTime();
+			String timeString = time.format((DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+			targetReading.put(timeString, copyMap(sourceReading.get(key)));
 		}
-		mapped.setReading(targetReading);
+		mapped.setReadingData(targetReading);
 		return mapped;
 	}
 
