@@ -6,7 +6,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -16,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="400.0" maxWidth="800.0" minHeight="400.0" minWidth="800.0" prefHeight="400.0" prefWidth="800.0" scaleShape="false" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="600.0" maxWidth="800.0" minHeight="0.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" scaleShape="false" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
    <left>
       <VBox alignment="TOP_CENTER" maxWidth="250.0" minWidth="250.0" prefWidth="250.0" BorderPane.alignment="TOP_CENTER">
          <children>
@@ -40,23 +39,26 @@
                   <RowConstraints vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Label text="Measurement Interval [s] :" />
+                  <Label text="Measurement Interval [s] :">
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding></Label>
                   <Slider fx:id="sliderMeasInterval" blockIncrement="60.0" majorTickUnit="45.0" max="300.0" maxWidth="200.0" min="15.0" minWidth="200.0" minorTickCount="2" onMouseDragged="#onMeasSliderUpdate" onMouseReleased="#onMeasSliderUpdate" prefWidth="200.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="15.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1">
                      <GridPane.margin>
                         <Insets bottom="10.0" top="10.0" />
                      </GridPane.margin>
                   </Slider>
-                  <Label text="Synchron Interval [s] :" GridPane.rowIndex="2" />
+                  <Label text="Synchron Interval [s] :" GridPane.rowIndex="2">
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding></Label>
                   <Slider fx:id="sliderSyncInterval" blockIncrement="60.0" majorTickUnit="120.0" max="900.0" maxWidth="200.0" min="60.0" minWidth="200.0" minorTickCount="1" onMouseDragged="#onSyncSliderUpdate" onMouseReleased="#onSyncSliderUpdate" prefWidth="200.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="60.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="3">
                      <GridPane.margin>
                         <Insets bottom="10.0" top="10.0" />
                      </GridPane.margin>
                   </Slider>
-                  <Spinner fx:id="spinnerMeasInterval" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" GridPane.columnIndex="1">
-                     <GridPane.margin>
-                        <Insets />
-                     </GridPane.margin></Spinner>
-                  <Spinner fx:id="spinnerSyncInterval" maxWidth="70.0" minWidth="70.0" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label fx:id="labelMeasInterval" text="0" GridPane.columnIndex="1" />
+                  <Label fx:id="labelSyncInterval" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
                <padding>
                   <Insets left="15.0" right="15.0" />
@@ -64,7 +66,7 @@
             </GridPane>
             <HBox alignment="TOP_CENTER">
                <children>
-                  <ToggleButton fx:id="buttonToggleOn" maxWidth="50.0" minWidth="50.0" mnemonicParsing="false" onAction="#onToggleOn" prefWidth="50.0" text="ON" textFill="#15b20c">
+                  <ToggleButton fx:id="buttonToggleOn" maxWidth="40.0" minWidth="40.0" mnemonicParsing="false" onAction="#onToggleOn" prefWidth="40.0" text="ON" textFill="#15b20c">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>
@@ -72,7 +74,7 @@
                         <Insets />
                      </HBox.margin>
                   </ToggleButton>
-                  <ToggleButton fx:id="buttonToggleOff" maxWidth="50.0" minWidth="50.0" mnemonicParsing="false" onAction="#onToggleOff" prefWidth="50.0" text="OFF" textFill="#b00c0c">
+                  <ToggleButton fx:id="buttonToggleOff" maxWidth="40.0" minWidth="40.0" mnemonicParsing="false" onAction="#onToggleOff" prefWidth="40.0" text="OFF" textFill="#b00c0c">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>
@@ -80,15 +82,20 @@
                         <Insets />
                      </HBox.margin>
                   </ToggleButton>
+                  <Button fx:id="buttonSaveAndRefresh" alignment="BOTTOM_CENTER" maxWidth="100.0" minWidth="100.0" mnemonicParsing="false" onAction="#onSaveAndRefresh" prefWidth="100.0" text="Save &amp; Refresh">
+                     <HBox.margin>
+                        <Insets left="15.0" />
+                     </HBox.margin>
+                  </Button>
                </children>
                <VBox.margin>
                   <Insets bottom="15.0" top="10.0" />
                </VBox.margin>
             </HBox>
             <Separator prefWidth="200.0" />
-            <Button alignment="BOTTOM_CENTER" maxWidth="150.0" minWidth="150.0" mnemonicParsing="false" onAction="#buttonTest" prefWidth="150.0" text="Save Settings &amp; Refresh">
+            <Button fx:id="buttonLoadData" alignment="BOTTOM_CENTER" maxWidth="195.0" minWidth="195.0" mnemonicParsing="false" onAction="#onLoadData" prefWidth="195.0" text="Load Data for selected Station">
                <VBox.margin>
-                  <Insets top="30.0" />
+                  <Insets top="15.0" />
                </VBox.margin>
             </Button>
          </children>

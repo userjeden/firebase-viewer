@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class StationSettings {
+public class StationSetting {
 
 	private boolean stationActive;
 	private int requestInterval;

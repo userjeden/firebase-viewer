@@ -41,7 +41,7 @@ public class App extends Application {
 		appWindow.show();
 	}
 
-	public static void showControlPage() {
+	public static void showStationManagementBoard() {
 		appWindow.setScene(controlScene);
 	}
 

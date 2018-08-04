@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class StationSettingsDTO {
+public class StationSettingDTO {
 
 	@JsonProperty("station_active")
 	private int stationActive;

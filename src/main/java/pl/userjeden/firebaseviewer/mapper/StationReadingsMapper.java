@@ -2,29 +2,28 @@ package pl.userjeden.firebaseviewer.mapper;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import pl.userjeden.firebaseviewer.model.StationSettings;
-import pl.userjeden.firebaseviewer.model.StationSettingsDTO;
+import pl.userjeden.firebaseviewer.model.StationReading;
+import pl.userjeden.firebaseviewer.model.StationReadingDTO;
 
 public class StationReadingsMapper {
 
-	public static StationSettings map(StationSettingsDTO value){
-		StationSettings mapped = new StationSettings();
-		mapped.setRequestInterval(value.getRequestInterval());
-		mapped.setSyncronInterval(value.getSyncronInterval());
-		mapped.setStationActive(value.getStationActive()>0? true : false);
-		return mapped;
-	}
-
-	public static Map<String, StationSettings> map(Map<String, StationSettingsDTO> value){
-		Map<String, StationSettings> mapped = new HashMap<String, StationSettings>();
-		for(String station : value.keySet()){
-			mapped.put(station, map(value.get(station)));
+	public StationReading map(StationReadingDTO value) {
+		StationReading mapped = new StationReading();
+		Map<Long, Map<String, String>> sourceReading = value.getReading();
+		Map<Long, Map<String, String>> targetReading = new HashMap<Long, Map<String, String>>();
+		for (Long key : sourceReading.keySet()) {
+			targetReading.put(key, copyMap(sourceReading.get(key)));
 		}
-		System.out.println("mapper keys: " + mapped.keySet().toString());
-		System.out.println("mapper values: " + mapped.values().toString());
+		mapped.setReading(targetReading);
 		return mapped;
 	}
 
+	private Map<String, String> copyMap(Map<String, String> input) {
+		Map<String, String> copied = new HashMap<String, String>();
+		for (String key : input.keySet()) {
+			copied.put(key, input.get(key));
+		}
+		return copied;
+	}
 
 }
